@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Appeal</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="/"><i class="fas"></i>Головна</a></li>
+            <li><a href="#"><i class="fas"></i></a></li>
+            <li><a href="/login"><i class="fas"></i>Увійти</a></li>
+            <li><a href="/registration"><i class="fas"></i>Реєстрація</a></li>
+            <li><a href=""><i class="fas"></i></a></li>
+            <li><a href="/tasks"><i class="fas fa-tasks"></i>Завдання</a></li>
+            <li><a href="/appeals"><i class="fas fa-envelope"></i>Звернення</a></li>
+            <li><a href="/orders"><i class="fas fa-shopping-cart"></i>Замовлення</a></li>
+            <li><a href="/goods"><i class="fas fa-warehouse"></i>Товари</a></li>
+            <li><a href="/users"><i class="fas fa-users"></i>Клієнти</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Appeal Details</h1>
+        <form id="appealForm" onsubmit="updateAppeal(event)">
+            <div class="container">
+                <label for="userId">User ID:</label>
+                <input type="text" id="userId" value="{{ appeal.user_id }}" required>
+                <label for="message">Message:</label>
+                <textarea id="message" required>{{ appeal.message }}</textarea>
+            </div>
+            <div class="container">
+                <label for="resolved">Resolved:</label>
+                <select id="resolved" required>
+                    <option value="True" {% if appeal.resolved %}selected{% endif %}>True</option>
+                    <option value="False" {% if not appeal.resolved %}selected{% endif %}>False</option>
+                </select>
+            </div>
+            <div class="container">
+                <button type="submit">Update</button>
+                <button type="button" onclick="deleteAppeal()">Delete</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        function updateAppeal(event) {
+            event.preventDefault();
+
+            var userId = document.getElementById("userId").value;
+            var message = document.getElementById("message").value;
+            var resolved = document.getElementById("resolved").value === "True";;
+
+            var data = {
+                user_id: userId,
+                message: message,
+                resolved: resolved
+            };
+
+            fetch("/api/appeals/{{ appeal.id }}", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    location.reload();
+                    // Handle success response if needed
+                })
+                .catch(error => {
+                    console.error(error);
+                    // Handle error if needed
+                });
+        }
+
+        function deleteAppeal() {
+            if (confirm("Are you sure you want to delete this appeal?")) {
+                fetch("/api/appeals/{{ appeal.id }}", {
+                    method: "DELETE"
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        console.log(result);
+                        window.location.replace("/appeals");
+                        // Handle success response if needed
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        // Handle error if needed
+                    });
+            }
+        }
+    </script>
+</body>
+
+</html>

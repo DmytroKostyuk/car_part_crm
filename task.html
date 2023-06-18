@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Task</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="/"><i class="fas"></i>Головна</a></li>
+            <li><a href="#"><i class="fas"></i></a></li>
+            <li><a href="/login"><i class="fas"></i>Увійти</a></li>
+            <li><a href="/registration"><i class="fas"></i>Реєстрація</a></li>
+            <li><a href=""><i class="fas"></i></a></li>
+            <li><a href="/tasks"><i class="fas fa-tasks"></i>Завдання</a></li>
+            <li><a href="/appeals"><i class="fas fa-envelope"></i>Звернення</a></li>
+            <li><a href="/orders"><i class="fas fa-shopping-cart"></i>Замовлення</a></li>
+            <li><a href="/goods"><i class="fas fa-warehouse"></i>Товари</a></li>
+            <li><a href="/users"><i class="fas fa-users"></i>Клієнти</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Task Details</h1>
+        <form id="update-form">
+            <p>ID: {{ task.id }}</p>
+            <label for="user_id">User ID:</label>
+            <input type="text" id="user_id" name="user_id" value="{{ task.user_id }}"><br>
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" value="{{ task.description }}"><br>
+            <label for="completed">Completed:</label>
+            <select id="completed" required>
+                <option value="True" {% if task.completed %}selected{% endif %}>True</option>
+                <option value="False" {% if not task.completed %}selected{% endif %}>False</option>
+            </select>
+            <button type="button" id="update-button">Update</button>
+            <button type="button" id="delete-button">Delete</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('update-button').addEventListener('click', function () {
+            var user_id = document.getElementById('user_id').value;
+            var description = document.getElementById('description').value;
+            var completed = document.getElementById('completed').value === "True";;
+
+            var data = {
+                user_id: user_id,
+                description: description,
+                completed: completed
+            };
+
+            fetch("/api/tasks/{{ task.id }}", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error(response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    alert(data.message);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    alert("Error updating task");
+                });
+        });
+
+        document.getElementById('delete-button').addEventListener('click', function () {
+            if (confirm("Are you sure you want to delete this task?")) {
+                fetch("/api/tasks/{{ task.id }}", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error(response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        alert(data.message);
+                        window.location.href = "/tasks";
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        alert("Error deleting task");
+                    });
+            }
+        });
+    </script>
+</body>
+
+</html>

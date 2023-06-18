@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tasks</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<style type="text/css">
+    body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  background-color: #141313;
+  width: 200px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.sidebar ul li {
+  margin-bottom: 10px;
+}
+
+.sidebar ul li a i {
+  margin-right: 10px;
+}
+
+/* Content Styles */
+.create-form {
+  margin-top: 20px;
+}
+
+.create-form h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.create-form label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.create-form input[type="text"] {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #201e1e;
+  border-radius: 3px;
+}
+
+.create-form button {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.create-form button:hover {
+  background-color: #555;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .container {
+    margin-left: 200px;
+  }
+}
+</style>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="/"><i class="fas"></i>Головна</a></li>
+            <li><a href="#"><i class="fas"></i></a></li>
+            <li><a href="/login"><i class="fas"></i>Увійти</a></li>
+            <li><a href="/registration"><i class="fas"></i>Реєстрація</a></li>
+            <li><a href=""><i class="fas"></i></a></li>
+            <li><a href="/tasks"><i class="fas fa-tasks"></i>Завдання</a></li>
+            <li><a href="/appeals"><i class="fas fa-envelope"></i>Звернення</a></li>
+            <li><a href="/orders"><i class="fas fa-shopping-cart"></i>Замовлення</a></li>
+            <li><a href="/goods"><i class="fas fa-warehouse"></i>Товари</a></li>
+            <li><a href="/users"><i class="fas fa-users"></i>Клієнти</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Tasks</h1>
+        <ul>
+            {% for task in tasks %}
+            <li>
+                <a href="/tasks/{{ task.id }}">{{ task.description }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="create-form">
+            <h2>Create Task</h2>
+            <form onsubmit="createTask(event)">
+                <label for="user_id">User ID:</label>
+                <input type="text" id="user_id" required>
+                <label for="description">Description:</label>
+                <input type="text" id="description" required>
+
+                <button type="submit">Create</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function createTask(event) {
+            event.preventDefault();
+
+            var user_id = document.getElementById("user_id").value;
+            var description = document.getElementById("description").value;
+
+            var data = {
+                user_id: user_id,
+                description: description
+            };
+
+            fetch("/api/tasks", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+    </script>
+</body>
+
+</html>

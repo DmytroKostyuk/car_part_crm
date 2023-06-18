@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Goods</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<style>
+       
+#createGoodsForm {
+  margin-top: 20px;
+}
+
+#createGoodsForm h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+#createGoodsForm label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+#createGoodsForm input[type="text"],
+#createGoodsForm input[type="number"] {
+  width: 200px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+#createGoodsForm button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+#createGoodsForm button:hover {
+  background-color: #45a049;
+} 
+</style>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="/"><i class="fas"></i>Головна</a></li>
+            <li><a href="#"><i class="fas"></i></a></li>
+            <li><a href="/login"><i class="fas"></i>Увійти</a></li>
+            <li><a href="/registration"><i class="fas"></i>Реєстрація</a></li>
+            <li><a href=""><i class="fas"></i></a></li>
+            <li><a href="/tasks"><i class="fas fa-tasks"></i>Завдання</a></li>
+            <li><a href="/appeals"><i class="fas fa-envelope"></i>Звернення</a></li>
+            <li><a href="/orders"><i class="fas fa-shopping-cart"></i>Замовлення</a></li>
+            <li><a href="/goods"><i class="fas fa-warehouse"></i>Товари</a></li>
+            <li><a href="/users"><i class="fas fa-users"></i>Клієнти</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Goods List</h1>
+        <ul>
+            {% for good in goods %}
+            <li>
+                <a href="/goods/{{ good.id }}">{{ good.name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Create New Goods</h2>
+        <div id="createGoodsForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required><br>
+
+            <label for="price">Price:</label>
+            <input type="number" id="price" required><br>
+
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" required><br>
+
+            <button onclick="createGoods()">Create</button>
+        </div>
+    </div>
+
+    <script>
+        function createGoods() {
+            var name = document.getElementById("name").value;
+            var price = document.getElementById("price").value;
+            var quantity = document.getElementById("quantity").value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/goods", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response.message);
+                    location.reload();
+                }
+            };
+
+            var data = JSON.stringify({
+                name: name,
+                price: price,
+                quantity: quantity
+            });
+
+            xhr.send(data);
+        }
+    </script>
+</body>
+
+</html>

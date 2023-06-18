@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Orders</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        #createOrderForm {
+            display: flex;
+            gap: 6px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <ul>
+            <li><a href="/"><i class="fas"></i>Головна</a></li>
+            <li><a href="#"><i class="fas"></i></a></li>
+            <li><a href="/login"><i class="fas"></i>Увійти</a></li>
+            <li><a href="/registration"><i class="fas"></i>Реєстрація</a></li>
+            <li><a href=""><i class="fas"></i></a></li>
+            <li><a href="/tasks"><i class="fas fa-tasks"></i>Завдання</a></li>
+            <li><a href="/appeals"><i class="fas fa-envelope"></i>Звернення</a></li>
+            <li><a href="/orders"><i class="fas fa-shopping-cart"></i>Замовлення</a></li>
+            <li><a href="/goods"><i class="fas fa-warehouse"></i>Товари</a></li>
+            <li><a href="/users"><i class="fas fa-users"></i>Клієнти</a></li>
+        </ul>
+    </div>
+    <div class="container">
+        <h1>Orders List</h1>
+        <ul>
+            {% for order in orders %}
+            <li>
+                <a href="/orders/{{ order.id }}">{{ order.id }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Create New Order</h2>
+        <div id="createOrderForm">
+            <label for="user_id">User ID:</label>
+            <input type="text" id="user_id" required><br>
+
+            <label for="items">Items:</label><br>
+            <div id="itemsContainer"></div>
+            <span>
+                <button onclick="addItem()">Add Item</button>
+                <button onclick="createOrder()">Create</button>
+            </span>
+        </div>
+    </div>
+
+    <script>
+        var itemCount = 1;
+        var goods = {{ goods| tojson }};
+
+        function addItem() {
+            var itemsContainer = document.getElementById("itemsContainer");
+
+            var itemDiv = document.createElement("div");
+            itemDiv.id = "item" + itemCount;
+
+            var goodsSelect = document.createElement("select");
+            goodsSelect.id = "goods_id" + itemCount;
+            goodsSelect.required = true;
+
+            var defaultOption = document.createElement("option");
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.value = "";
+            defaultOption.textContent = "Select Goods";
+
+            goodsSelect.appendChild(defaultOption);
+
+            for (var i = 0; i < goods.length; i++) {
+                var option = document.createElement("option");
+                option.value = goods[i].id;
+                option.textContent = goods[i].name;
+                goodsSelect.appendChild(option);
+            }
+
+            var quantityLabel = document.createElement("label");
+            quantityLabel.textContent = "Quantity:";
+            var quantityInput = document.createElement("input");
+            quantityInput.type = "number";
+            quantityInput.id = "quantity" + itemCount;
+            quantityInput.required = true;
+
+            itemDiv.appendChild(goodsSelect);
+            itemDiv.appendChild(quantityLabel);
+            itemDiv.appendChild(quantityInput);
+
+            itemsContainer.appendChild(itemDiv);
+
+            itemCount++;
+        }
+
+        function createOrder() {
+            var user_id = document.getElementById("user_id").value;
+            var items = [];
+
+            for (var i = 1; i < itemCount; i++) {
+                var goods_id = document.getElementById("goods_id" + i).value;
+                var quantity = document.getElementById("quantity" + i).value;
+
+                var item = {
+                    goods_id: goods_id,
+                    quantity: quantity
+                };
+
+                items.push(item);
+            }
+
+            var data = {
+                user_id: user_id,
+                items: items
+            };
+
+            fetch("/api/orders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+    </script>
+</body>
+
+</html>
